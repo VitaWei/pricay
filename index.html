@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		#c{
+			border: 1px solid red;
+		}
+	</style>
+</head>
+<body>
+	<canvas width="800" height="600" id="c"></canvas>
+	<script>
+		var cas = document.querySelector("#c");
+		var ctx = cas.getContext("2d");
+		function angleToRadian(angle){
+			return angle * Math.PI / 180;
+		}
+
+		function getRandomColor(){
+			return "rgb(" + parseInt(Math.random() * 255) + "," + parseInt( Math.random() * 255) + "," + parseInt( Math.random() * 255) + ")";
+		}
+
+		var data = [
+			{
+				title: "程序员",
+				count: 100
+			},
+			{
+				title: "程序媛",
+				count: 80
+			},
+			{
+				title: "攻城狮",
+				count: 110
+			},
+			{
+				title: "射击师",
+				count: 50
+			},
+			{
+				title: "架构师",
+				count: 30
+			},
+		];
+		
+		//1. 先计算所有数据的总和
+		var sum = 0;
+		data.forEach(function(v){
+			sum += v.count;
+		})
+
+		//2. 根据总和求比例，根据比例算出角度
+		var agArr = data.map(function(v){
+			return 360 * (v.count / sum);
+		})
+
+		//3. 依据agArr中存储的角度，绘制每一个扇形
+		var x = cas.width / 2;
+		var y = cas.height / 2;
+		var r = 200;
+		var startAngle = -90;
+		var padding = 20;
+		var textPadding = 10;
+
+		ctx.font = "20px 幼圆";
+
+		agArr.forEach(function(v, i){
+			ctx.beginPath();
+			ctx.strokeStyle = ctx.fillStyle = getRandomColor();
+
+			//moveTo到圆心
+			ctx.moveTo(x, y);
+			//绘制圆弧
+			ctx.arc(x, y, r, angleToRadian(startAngle), angleToRadian(startAngle + v));
+			//closePath
+			ctx.closePath();
+			ctx.fill();
+
+			//绘制扇形的中线
+			//圆上点的坐标的公式
+			// var x1 = x + r * Math.cos(弧度);
+			// var y1 = y + r * Math.sin(弧度);
+
+			var angle = angleToRadian(startAngle + v / 2);
+			var x1 = x + (r + padding) * Math.cos(angle);
+			var y1 = y + (r + padding) * Math.sin(angle);
+
+			ctx.lineTo(x1, y1);
+
+
+			//绘制文字的下划线
+			var content = data[i].title;
+			var width = ctx.measureText(content).width;
+
+			//判断要画的线是在圆心的左边还是右边
+			if(x1 < x){
+				ctx.lineTo(x1 - width, y1);
+				ctx.fillText(content, x1 - width, y1 - textPadding);
+			}else{
+				ctx.lineTo(x1 + width, y1);
+
+				//绘制文字
+				ctx.fillText(content, x1, y1 - textPadding);
+			}
+			ctx.stroke();
+
+			startAngle += v;
+		})
+	</script>
+</body>
+</html>
